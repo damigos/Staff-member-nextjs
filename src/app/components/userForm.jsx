@@ -2,31 +2,47 @@
 
 import { fetchAPI, USER_URL } from '@/utils/common';
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
 
-export default function UserForm({user}) {
-    const defaultMail = user?.id ? user.Email : ""
-    console.log(user)
-  const [email, setEmail] = useState(defaultMail);
-  const [password, setPassword] = useState("");
+export default function UserForm({ user }) {
+  const defaultMail = user?.id ? user.Email : '';
+  const schema = yup
+    .object({
+      email: yup.string().required(),
+    })
+    .required();
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      email: defaultMail,
+      password: '',
+    },
+    resolver: yupResolver(schema),
+  });
   const [submitMessage, setSubmitMessage] = useState(false);
 
-  const submitHandler = async (event) => {
-    event.preventDefault();
+  const submitHandler = async (data) => {
     setSubmitMessage(false);
-    const url = user?.id ?`${USER_URL}/${user.id}` : USER_URL
-    const method = user?.id ? "put" : "post"
+    const url = user?.id ? `${USER_URL}/${user.id}` : USER_URL;
+    const method = user?.id ? 'put' : 'post';
     const response = await fetchAPI(url, {
       method,
       body: JSON.stringify({
-        email,
-        password,
+        email: data.email,
+        password: data.password,
       }),
     });
-    if (!user?.id){
-    setEmail('');
-    setPassword('');
+    if (!user?.id) {
+      reset();
     }
-    
+
     setSubmitMessage(response.message);
   };
   return (
@@ -36,26 +52,33 @@ export default function UserForm({user}) {
       <form
         id='userAdd'
         className='container mx-auto mt-8 p-4'
-        onSubmit={submitHandler}
+        onSubmit={handleSubmit(submitHandler)}
       >
-        <label >Email</label>
-        <input
-          type='email'
-          id='email'
-          name='email'
-          className='w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring focus:ring-blue-200'
-          value={email}
-          onChange={(e)=>setEmail(e.target.value)}
-        />
-        <label >Password</label>
-        <input
-          type='password'
-    
-          name='password'
-          className='w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring focus:ring-blue-200'
-          value={password}
-          onChange={(e)=>setPassword(e.target.value)}
-        />
+        <div className='mb-4'>
+          <label>Email</label>
+          <input
+            type='email'
+            id='email'
+            name='email'
+            {...register('email')}
+            className='w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring focus:ring-blue-200'
+          />
+          {errors.email && (
+            <span className='text-red-500'>{errors.email.message}</span>
+          )}
+        </div>
+
+        <div className='mb-4'>
+          <label>Password</label>
+          <input
+            type='password'
+            name='password'
+            {...register('password')}
+            className='w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring focus:ring-blue-200'
+          />
+          {errors.password && <p>{errors.password.message}</p>}
+        </div>
+
         <button
           type='submit'
           id='userSubmitBtn'

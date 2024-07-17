@@ -44,7 +44,7 @@ export const getFilteredItem = function (stack, property, matcher) {
     return result;
   };
   
-  export const BUSINESS_URL = "http://localhost:3001/api/business";
-  export const STAFF_URL = "http://localhost:3001/api/staff";
-  export const USER_URL = "http://localhost:3001/api/users";
+  export const BUSINESS_URL = `${process.env.API_URL}/api/business`;
+  export const STAFF_URL = `${process.env.API_URL}/api/staff`;
+  export const USER_URL = `${process.env.API_URL}api/users`;
   
